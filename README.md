@@ -5,6 +5,8 @@ Built for large-scale acoustic workflows, **SAMLab** helps researchers and pract
 
 The software works well with Python 3.11.9.
 
+<img src=https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif  height="300">
+
 ## Installation
 
 Clone the repository and install dependencies:
@@ -14,8 +16,6 @@ cd SAMLab
 pip install -r requirements.txt
 ```
 
-An example video here:
-<img src=https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif  height="300">
 
 ## License
 
