@@ -14,6 +14,7 @@ cd SAMLab
 pip install -r requirements.txt
 ```
 
+An example video here:
 ![demo video](./screenshot/deployment_navigation_graph.gif)
 
 ## License
