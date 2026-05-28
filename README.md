@@ -12,6 +12,8 @@ Clone the repository and install dependencies:
 git clone https://github.com/yourname/SAMLab.git
 cd SAMLab
 pip install -r requirements.txt
+```
+
 
 ## License
 
