@@ -10,7 +10,8 @@ The software works well with Python 3.11.9.
 Create a Python environment and install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip  install -r requirements.txt
+```
 
 ## License
 
