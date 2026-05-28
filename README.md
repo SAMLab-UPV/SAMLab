@@ -1,7 +1,7 @@
 # SAMLab
 
 **SAMLab** is a cross-platform graphical software package written in Python for analysing, visualising, and reporting results from long-term Passive Acoustic Monitoring (PAM) campaigns.
-Built for large-scale acoustic workflows, SAMLab helps researchers and practitioners explore, process, and review thousands of hours of recordings through an intuitive GUI and an extensible plugin system for species-specific detectors and custom analysis modules. From campaign management and acoustic visualisation to detection review and reproducible reporting, **SAMLab** provides a flexible environment for turning raw acoustic data into actionable insight.
+Built for large-scale acoustic workflows, **SAMLab** helps researchers and practitioners explore, process, and review thousands of hours of recordings through an intuitive GUI and an extensible plugin system for species-specific detectors and custom analysis modules. From campaign management and acoustic visualisation to detection review and reproducible reporting, **SAMLab** provides a flexible environment for turning raw acoustic data into actionable insight.
 
 The software works well with Python 3.11.9.
 
