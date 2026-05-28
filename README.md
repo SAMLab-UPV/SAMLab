@@ -5,7 +5,7 @@ Built for large-scale acoustic workflows, **SAMLab** helps researchers and pract
 
 The software works well with Python 3.11.9.
 
-| Deployment Navigator Graph  | SAMLab GUI |
+| Deployment Navigation Graph  | SAMLab GUI |
 | ------------- | ------------- |
 | <img src=https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif  height="300">  | <img src=https://github.com/rmiralle/SAMLab/blob/main/screenshots/SAMLab.png  height="300">  |
 
