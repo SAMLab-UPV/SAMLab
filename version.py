@@ -1,0 +1,3 @@
+APP_NAME = "SAMLab"
+VERSION = "0.9.4-beta"
+RELEASE_DATE = "2026-05-8"
