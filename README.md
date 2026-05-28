@@ -16,6 +16,7 @@ pip install -r requirements.txt
 
 An example video here:
 ![demo video](./screenshot/deployment_navigation_graph.gif)
+![demo video](https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif)
 
 ## License
 
