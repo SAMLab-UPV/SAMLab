@@ -7,11 +7,11 @@ The software works well with Python 3.11.9.
 
 ## Installation
 
-Create a Python environment and install dependencies:
-
+Clone the repository and install dependencies:
 ```bash
-pip  install -r requirements.txt
-```
+git clone https://github.com/yourname/SAMLab.git
+cd SAMLab
+pip install -r requirements.txt
 
 ## License
 
@@ -21,4 +21,5 @@ SAMLab is dual-licensed under:
   (see `LICENSE` for details)
 
 - Commercial licenses for proprietary and industrial use  
-  (see `LICENSE_COMMERCIAL.txt` for details)# SAMLab
+  (see `LICENSE_COMMERCIAL.txt` for details)
+  
