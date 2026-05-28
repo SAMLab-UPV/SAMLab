@@ -18,6 +18,8 @@ An example video here:
 ![demo video](./screenshot/deployment_navigation_graph.gif)
 ![demo video](https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif)
 
+![demo video]<img src=<https://github.com/rmiralle/SAMLab/blob/main/screenshots/deployment_navigation_graph.gif>  height="275">
+
 ## License
 
 SAMLab is dual-licensed under:
