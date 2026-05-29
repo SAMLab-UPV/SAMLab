@@ -25,9 +25,11 @@ pip install -r requirements.txt
 
 SAMLab is dual-licensed under:
 
-- GNU General Public License v3.0 (GPLv3) for open-source use  
+- GNU Affero General Public License v3.0 (AGPLv3) for open-source use
   (see `LICENSE` for details)
 
-- Commercial licenses for proprietary and industrial use  
+- Commercial licenses for organisations wishing to use, modify, distribute, or integrate SAMLab without complying with the AGPLv3 requirements
   (see `LICENSE_COMMERCIAL.txt` for details)
+
+For commercial licensing enquiries, please contact samaruc.info@gmail.com
   
