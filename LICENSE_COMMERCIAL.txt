@@ -1,0 +1,13 @@
+Commercial Licensing Information
+================================
+
+Commercial licences for SAMLab are available from:
+
+Universitat Politècnica de València
+
+A commercial licence grants rights to use, modify, distribute, or integrate
+SAMLab without the obligations imposed by the GNU Affero General Public
+License v3.0.
+
+For commercial licensing enquiries, contact:
+samaruc.info@gmail.com
