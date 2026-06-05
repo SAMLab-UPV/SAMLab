@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use SAMLab in your research, please cite it using the metadata below."
-title: SAMLab
+title: SAMLab - Submarine Acoustic Monitoring Laboratory
 abstract: "SAMLab is a cross-platform graphical software package for analysing, visualising, and reporting results from long-term Passive Acoustic Monitoring (PAM) campaigns. The software provides an extensible plugin framework for species-specific detectors and custom analysis workflows, enabling scalable processing and review of large acoustic datasets."
 type: software
 
@@ -10,7 +10,7 @@ authors:
   given-names: "Ramon"
   affiliation: "Universitat Politècnica de València"
 
-version: 1.0.0
+version: 0.9.4-beta
 date-released: "2026-06-05"
 
 license: AGPL-3.0-or-later
