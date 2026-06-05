@@ -1,17 +1,30 @@
 cff-version: 1.2.0
-title: SAMLab
 message: "If you use SAMLab in your research, please cite it using the metadata below."
+title: SAMLab
+abstract: "SAMLab is a cross-platform graphical software package for analysing, visualising, and reporting results from long-term Passive Acoustic Monitoring (PAM) campaigns. The software provides an extensible plugin framework for species-specific detectors and custom analysis workflows, enabling scalable processing and review of large acoustic datasets."
 type: software
+
 authors:
 
-* family-names: Miralles
-  given-names: Ramon
-  affiliation: Universitat Politècnica de València
-  version: 1.0.0
-  date-released: 2026-06-05
-  license: AGPL-3.0-or-later
-  repository-code: https://github.com/<user>/SAMLab
-  abstract: >
-  SAMLab is a cross-platform graphical software package for analysing,
-  visualising, and reporting results from long-term Passive Acoustic
-  Monitoring campaigns.
+* family-names: "Miralles"
+  given-names: "Ramon"
+  affiliation: "Universitat Politècnica de València"
+
+version: 1.0.0
+date-released: "2026-06-05"
+
+license: AGPL-3.0-or-later
+
+repository-code: "https://github.com/<your-user>/SAMLab"
+url: "https://samaruc.webs.upv.es/index.php/samlab/"
+
+keywords:
+
+* passive acoustic monitoring
+* PAM
+* bioacoustics
+* underwater acoustics
+* marine mammals
+* acoustic monitoring
+* signal processing
+* biodiversity
