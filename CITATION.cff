@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: SAMLab
+message: "If you use SAMLab in your research, please cite it using the metadata below."
+type: software
+authors:
+
+* family-names: Miralles
+  given-names: Ramon
+  affiliation: Universitat Politècnica de València
+  version: 1.0.0
+  date-released: 2026-06-05
+  license: AGPL-3.0-or-later
+  repository-code: https://github.com/<user>/SAMLab
+  abstract: >
+  SAMLab is a cross-platform graphical software package for analysing,
+  visualising, and reporting results from long-term Passive Acoustic
+  Monitoring campaigns.
