@@ -1,13 +1,21 @@
-Commercial Licensing Information
-================================
+SAMLab Commercial Licensing
 
-Commercial licences for SAMLab are available from:
+SAMLab is available under the GNU Affero General Public License v3.0 (AGPLv3) for open-source use.
 
-Universitat Politècnica de València
+Commercial licences are available for organisations wishing to use, modify, distribute, integrate, embed, or provide SAMLab as part of proprietary, OEM, SaaS, or other products without complying with the AGPLv3 requirements.
 
-A commercial licence grants rights to use, modify, distribute, or integrate
-SAMLab without the obligations imposed by the GNU Affero General Public
-License v3.0.
+Commercial licences may include:
 
-For commercial licensing enquiries, contact:
+* Permission to keep modifications proprietary.
+* Permission to distribute proprietary versions of SAMLab.
+* Permission to integrate SAMLab into commercial products and services.
+* OEM redistribution rights.
+* Additional support, maintenance, or consulting services where agreed.
+
+Commercial licence terms, pricing, and conditions are provided on a case-by-case basis.
+
+For commercial licensing enquiries, please contact:
+
 samaruc.info@gmail.com
+
+Copyright (C) 2026 Universitat Politècnica de València

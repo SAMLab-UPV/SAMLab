@@ -2,10 +2,10 @@
 SAMLab - Submarine Acoustic Monitoring Laboratory
 Copyright (C) 2026 Universitat Politècnica de València
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License v3.
+This file is part of SAMLab.
 
-Commercial licenses are available. Contact: rmiralle@dcom.upv.es
+Licensed under the GNU Affero General Public License v3.0 or later.
+See the LICENSE file for details.
 """
 
 import os

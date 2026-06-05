@@ -1,3 +1,13 @@
+"""
+SAMLab - Submarine Acoustic Monitoring Laboratory
+Copyright (C) 2026 Universitat Politècnica de València
+
+This file is part of SAMLab.
+
+Licensed under the GNU Affero General Public License v3.0 or later.
+See the LICENSE file for details.
+"""
+
 class AnalysisBase:
     """Base class for all analysis plugins."""
     name = "Unnamed Analysis"
