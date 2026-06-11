@@ -55,6 +55,7 @@ import sounddevice as sd # To play audio files (better than pyaudio and supports
 # Local models
 from modules.models import DSP, Bands, EVENT_FIELDS_TYPES, default_dsp, default_bands
 from modules.ui_helpers import  ask_open_file, is_number, clamp_posx, StatusWindow, EmittingStream, ReliableCsvDialog
+from modules.ui_double_range_slider import DoubleVerticalRangeSlider
 from modules.plugin_selector_dialog import  PluginSelector
 from modules.drawing_modules import draw_tfr, big_data_graph, draw_auxiliary_nav_graph
 from modules.deployment_analysis_ui import dlg_analyze_deplyment_warning, dlg_analyze_deployment_settings,analyze_samaruc_deployment
@@ -399,12 +400,24 @@ class MainWindow(QMainWindow):
         self.deploy_canvas = FigureCanvas(self.figDeployInspect)
         self.deploy_canvas.setStyleSheet("background: transparent;") # transparent for dark mode
         
-         # Connect click event
+        # Dual knob range slider
+        self.double_slider = DoubleVerticalRangeSlider(
+            minimum=0,
+            maximum=100,
+            low=0,
+            high=100,
+        )
+        # Connect the rangeChanged signal of the double slider to the update_image method
+        self.double_slider.rangeChanged.connect(self.update_deployment_nav_image)
+        
+        # Connect click event
         self.figDeployInspect.canvas.mpl_connect("button_press_event", self.deployisnpecOnClick)
 
-        # Add the canvas to the Qt layout
-        layout.addWidget(self.deploy_canvas)
-        #self.setLayout(layout)
+        image_nav_layout = QHBoxLayout()
+        # Add the canvas and dual slider to the Qt layout
+        image_nav_layout.addWidget(self.deploy_canvas)
+        image_nav_layout.addWidget(self.double_slider)
+        layout.addLayout(image_nav_layout)
 
         # Create an axis for the image
         self.ax4 = self.figDeployInspect.add_subplot(111)
@@ -1326,6 +1339,19 @@ class MainWindow(QMainWindow):
                 self.deployment_nav_bitmap.set_clim(vmin,vmax)
                 self.figDeployInspect.canvas.draw_idle()
 
+                # Check to see if it makes sense having the double slidere enable and if so
+                # set the min and max of the double knot slider
+                if np.isclose(vmin, vmax):
+                    self.deployment_nav_bitmap.set_clim(vmin - 0.5, vmax + 0.5)
+
+                    self.double_slider.setEnabled(False)
+                    self.double_slider.setToolTip("Disabled because all values are equal; no range can be selected.")
+                else:
+                    self.double_slider.setEnabled(True)
+                    self.double_slider.setToolTip("")
+
+                    self.double_slider.setRange(vmin, vmax)
+
                 # Activate the binding of fieldselect
                 self.fieldselect.setEnabled(True)
 
@@ -1361,14 +1387,41 @@ class MainWindow(QMainWindow):
                 self.fieldselect.addItems(field_cell)
                 self.fieldselect.setCurrentIndex(0)
 
-        
+    def update_deployment_nav_image(self, vmin, vmax):
+        vmin = float(vmin)
+        vmax = float(vmax)
+
+        if vmax <= vmin:
+            vmax = vmin + 1e-6
+
+        self.deployment_nav_bitmap.set_clim(vmin, vmax)
+
+        if hasattr(self, "deployment_nav_colorbar"):
+            self.deployment_nav_colorbar.update_normal(self.deployment_nav_bitmap)
+
+        self.figDeployInspect.canvas.draw_idle()
+
     def fieldselect_Callback(self,event):
         valsel=self.fieldselect.currentIndex()
         self.parameterselected=self.A[:,valsel].astype(None)
         big_data_graph(self,self.parameterselected,self.graph_yticks,self.TIME_STAMP_day,self.TIME_STAMP_min)
         self.HC.set_label(self.parameter_units[valsel], size=10,rotation=90)
         vmin=np.nanmin(self.parameterselected);vmax=np.nanmax(self.parameterselected)
-        self.deployment_nav_bitmap.set_clim(vmin,vmax)
+
+        # Check to see if it makes sense having the double slidere enable and if so
+        # set the min and max of the double knot slider
+        if np.isclose(vmin, vmax):
+            self.deployment_nav_bitmap.set_clim(vmin - 0.5, vmax + 0.5)
+
+            self.double_slider.setEnabled(False)
+            self.double_slider.setToolTip("Disabled because all values are equal; no range can be selected.")
+        else:
+            self.double_slider.setEnabled(True)
+            self.double_slider.setToolTip("")
+
+            self.double_slider.setRange(vmin, vmax)
+            self.deployment_nav_bitmap.set_clim(vmin,vmax)
+
         self.figDeployInspect.canvas.draw_idle()
 
     def deployisnpecOnClick(self,event):
