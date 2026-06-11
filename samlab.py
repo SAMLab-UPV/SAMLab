@@ -437,6 +437,7 @@ class MainWindow(QMainWindow):
         divider = make_axes_locatable(self.ax4)
         cax = divider.append_axes("right", size="5%", pad=0.08) # To make colorbar narrower
         self.HC=self.figDeployInspect.colorbar(self.deployment_nav_bitmap, ax=self.ax4,cax=cax) #Color bar
+        self.HC.ax.tick_params(labelsize=LABEL_FONT_SIZE) # Adjust colorbar tick label size
         #self.canvas = FigureCanvasTkAgg(self.figDeployInspect, master=self.deploy_ins_frame)
         #self.canvas.get_tk_widget().grid(row=0,  column=0, columnspan=3, padx=0,  pady=0)
 
@@ -528,7 +529,8 @@ class MainWindow(QMainWindow):
         self.slider.setMinimum(0)
         self.slider.setMaximum(100)
         self.slider.setValue(50)
-        self.slider.setFixedWidth(600)
+        #self.slider.setFixedWidth(600)
+        self.slider.setFixedWidth(450)
         self.slider.setEnabled(False)
         nav_layout.addWidget(self.slider, 1, 1, 1, 3, Qt.AlignmentFlag.AlignCenter)
         # Activate the binding of the slider after the file is opened
