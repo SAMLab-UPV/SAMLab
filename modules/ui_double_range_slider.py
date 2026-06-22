@@ -5,6 +5,7 @@ from PySide6.QtGui import QPainter,QColor,QPen,QPainterPath
 from PySide6.QtWidgets import QWidget
 from .ui_constants import LABEL_FONT_SIZE
 import numpy as np
+import math
 
 class DoubleVerticalRangeSlider(QWidget):
     rangeChanged = Signal(float, float)
@@ -131,38 +132,23 @@ class DoubleVerticalRangeSlider(QWidget):
             self.height() - self.margin,
         )
 
-         # Major ticks every 5 units
-        tick_step = 5
+        # Get the major ticks step limiting the maximum number of ticks
+        tick_step = self.nice_tick_step(max_ticks=8)
+
+        first_tick = math.ceil(self.minimum / tick_step) * tick_step
+        last_tick = math.floor(self.maximum / tick_step) * tick_step
 
         major_values = np.arange(
-            np.floor(self.minimum),
-            np.ceil(self.maximum) + tick_step,
+            first_tick,
+            last_tick + tick_step * 0.5,
             tick_step
         )
 
-        painter.setPen(
-            QPen(Qt.black, 1)
-        )
-
+        painter.setPen(QPen(Qt.black, 1))
         font = painter.font()
         font.setPointSize(LABEL_FONT_SIZE)
         painter.setFont(font)
 
-        # for value in major_values:
-        #     y = self.value_to_y(value)
-
-        #     painter.drawLine(
-        #         self.track_x + 20,
-        #         int(y),
-        #         self.track_x + 30,
-        #         int(y),
-        #     )
-
-        #     painter.drawText(
-        #         self.track_x + 35,
-        #         int(y + 5),
-        #         str(value),
-        #     )
         for value in major_values:
             y = self.value_to_y(value)
 
@@ -176,11 +162,66 @@ class DoubleVerticalRangeSlider(QWidget):
             painter.drawText(
                 self.track_x + 35,
                 int(y + 5),
-                f"{value:.0f}",
+                f"{value:g}",
             )
 
         
+        # major_values = np.arange(
+        #     np.floor(self.minimum),
+        #     np.ceil(self.maximum) + tick_step,
+        #     tick_step
+        # )
+
+        # painter.setPen(
+        #     QPen(Qt.black, 1)
+        # )
+
+        # font = painter.font()
+        # font.setPointSize(LABEL_FONT_SIZE)
+        # painter.setFont(font)
+
+        
+        # for value in major_values:
+        #     y = self.value_to_y(value)
+
+        #     painter.drawLine(
+        #         self.track_x + 20,
+        #         int(y),
+        #         self.track_x + 30,
+        #         int(y),
+        #     )
+
+        #     painter.drawText(
+        #         self.track_x + 35,
+        #         int(y + 5),
+        #         f"{value:.0f}",
+        #     )
+
+        
         # Minor ticks
+
+        # if tick_step <= 10:
+        #     minor_step = tick_step / 5
+
+        #     minor_values = np.arange(
+        #         first_tick,
+        #         last_tick + minor_step * 0.5,
+        #         minor_step
+        #     )
+
+        #     for value in minor_values:
+        #         if abs((value / tick_step) - round(value / tick_step)) < 1e-6:
+        #             continue
+
+        #         y = self.value_to_y(value)
+
+        #         painter.drawLine(
+        #             self.track_x + 22,
+        #             int(y),
+        #             self.track_x + 27,
+        #             int(y),
+        #         )
+
         minor_values = np.arange(
         np.floor(self.minimum),
         np.ceil(self.maximum) + 1,1)
@@ -198,21 +239,6 @@ class DoubleVerticalRangeSlider(QWidget):
                 int(y),
             )
 
-        # for value in range(
-        #     self.minimum,
-        #     self.maximum + 1,
-        # ):
-        #     if value % 5 == 0:
-        #         continue
-
-        #     y = self.value_to_y(value)
-
-        #     painter.drawLine(
-        #         self.track_x + 22,
-        #         int(y),
-        #         self.track_x + 27,
-        #         int(y),
-        #     )
 
         # Handles
 
@@ -244,7 +270,8 @@ class DoubleVerticalRangeSlider(QWidget):
         if not self._dragging:
             return
 
-        value = round(self.y_to_value(event.position().y()))
+        #value = round(self.y_to_value(event.position().y()))
+        value = self.y_to_value(event.position().y())
 
         if self._dragging == "low":
             self.low = min(value, self.high)
@@ -256,3 +283,23 @@ class DoubleVerticalRangeSlider(QWidget):
 
     def mouseReleaseEvent(self, event):
         self._dragging = None
+
+    def nice_tick_step(self, max_ticks=8):
+        span = self.maximum - self.minimum
+        if span <= 0:
+            return 1
+
+        raw_step = span / max_ticks
+        magnitude = 10 ** math.floor(math.log10(raw_step))
+        residual = raw_step / magnitude
+
+        if residual <= 1:
+            nice = 1
+        elif residual <= 2:
+            nice = 2
+        elif residual <= 5:
+            nice = 5
+        else:
+            nice = 10
+
+        return nice * magnitude
