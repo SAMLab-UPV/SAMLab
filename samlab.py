@@ -1467,6 +1467,9 @@ class MainWindow(QMainWindow):
                 self.ll.set_bounds(xs-1, ys, pixx, pixy-1)
                 # Set the text to be displayed so that I can get the extents
                 self.lt.set_text(dedent(output_txt))
+                # Make it visible to get right the extents
+                self.lt.set_visible(True)
+                self.lp.set_visible(True)
                 # Force a draw so renderer is accurate 
                 self.figDeployInspect.canvas.draw_idle()
                 renderer = self.figDeployInspect.canvas.get_renderer()
