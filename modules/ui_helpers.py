@@ -136,8 +136,8 @@ def is_number(s):
 class ReliableCsvDialog(QDialog):
     def __init__(self, folder, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Reliable CSV Selector")
-        self.resize(500, 400)
+        self.setWindowTitle("Choose Deployment Analysis CSV File (deployment_indicators.csv)...")
+        self.resize(600, 300)
 
         self.layout = QVBoxLayout(self)
         self.label = QLabel(f"Scanning folder:\n{folder}")
