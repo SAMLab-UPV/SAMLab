@@ -1357,6 +1357,9 @@ class MainWindow(QMainWindow):
                 # Activate the binding of fieldselect
                 self.fieldselect.setEnabled(True)
 
+                # Update the title with the deployment file name
+                self.setWindowTitle(filename)
+
                 # Load if exist Manual Annotation File
                 parent_directory=os.path.basename(os.path.dirname(filename))
                 self.current_annotation_file = f"{parent_directory}_manual_annotated.csv"
