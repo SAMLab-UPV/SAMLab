@@ -30,9 +30,9 @@ def draw_tfr(self,y,fs,posx):
             fft_npoints=2**(self.FFTpoints.currentIndex()+5)
             hop_length_val=max(1, int(fft_npoints * 0.05)) # 95% overlap
             if self.hann_w_enabled.isChecked():
-                Pxx =librosa_stft(y.astype(float), n_fft=fft_npoints, hop_length=hop_length_val,window="hann", center=True)
+                Pxx =librosa_stft(y.astype(float), n_fft=fft_npoints, hop_length=hop_length_val,window="hann", center=False)
             else:
-                Pxx =librosa_stft(y.astype(float), n_fft=fft_npoints, hop_length=hop_length_val,window="hamming", center=True)
+                Pxx =librosa_stft(y.astype(float), n_fft=fft_npoints, hop_length=hop_length_val,window="hamming", center=False)
 
             freqs = np.arange(0, 1 + fft_npoints / 2) * fs / fft_npoints
             freq_slice = np.where((freqs >= fmin) & (freqs <= fmax))
@@ -42,7 +42,7 @@ def draw_tfr(self,y,fs,posx):
             self.TFR_bitmap.set_extent([posx_s,posx_s+duration_s,fmin,fmax])
             self.ax0.set_ylim(fmin,fmax)
         else:
-            Pxx =librosa_stft(y.astype(float), n_fft=256, hop_length=64, center=True)
+            Pxx =librosa_stft(y.astype(float), n_fft=256, hop_length=64, center=False)
             self.TFR_bitmap.set_extent([posx_s,posx_s+duration_s,0,fs/2])
             self.ax0.set_ylim(0,fs/2)
 
