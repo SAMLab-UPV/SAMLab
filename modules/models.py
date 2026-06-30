@@ -10,13 +10,14 @@ See the LICENSE file for details.
 
 from dataclasses import dataclass, field
 
-
 @dataclass
 class DSP:
-    scale_factor: float
     gain: float
     nbits: int
 
+    @property
+    def scale_factor(self):
+        return 10 ** (self.gain / 20) * 2 ** (self.nbits - 1)
 
 @dataclass
 class Bands:
@@ -46,10 +47,7 @@ EVENT_FIELDS_TYPES = [
 def default_dsp() -> DSP:
     gain = 0
     nbits = 16
-    return DSP(
-        scale_factor=10 ** (gain / 20) * 2 ** (nbits - 1),
-        gain=gain,
-        nbits=nbits,
+    return DSP(gain=gain, nbits=nbits,
     )
 
 

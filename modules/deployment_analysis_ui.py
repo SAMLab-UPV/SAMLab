@@ -31,6 +31,9 @@ from analysis_plugins import plugin_loader
 from modules.ui_helpers import StatusWindow, EmittingStream
 from modules.workers import DeploymentFileWorker
 
+# Import DSP and Bands classes for structured data handling
+from modules.models import DSP, Bands
+
 
 
 # --- Helper: load .mat either via h5py (v7.3 HDF5) or scipy (older MAT) ---
@@ -292,8 +295,19 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
     ddate = mat.get('ddate', None)
     fs = int(np.squeeze(mat.get('fs'))) if 'fs' in mat else None
     mono = int(np.squeeze(mat.get('mono'))) if 'mono' in mat else None
-    dsp = mat.get('dsp', {})    # may be structured
-    bands = mat.get('bands', {})
+    
+    dsp_raw = mat.get("dsp", {})
+    bands_raw = mat.get("bands", {})
+
+    dsp = DSP(
+        gain=float(dsp_raw.gain),
+        nbits=int(dsp_raw.nbits),)
+
+    bands = Bands(
+        number=np.asarray(bands_raw.number).astype(int).ravel().tolist(),
+        label=np.asarray(bands_raw.label).astype(str).ravel().tolist(),
+        sh=np.asarray(bands_raw.sh).astype(float).ravel().tolist(),)
+
     print(f"Deployment started at day/time: {ddate}")
     print(f"Recording setup: fs={fs} mono={mono}")
 
