@@ -216,10 +216,8 @@ class DeploymentInfoDialog(QDialog):
 
     def _collect_values(self) -> Tuple[DSP, Bands, datetime, float, bool, str]:
         dsp = DSP(
-            scale_factor=10**(float(self.dsp_gain_edit.text())/20)*2**(int(float(self.dsp_nbits_edit.text()))-1),
             gain=float(self.dsp_gain_edit.text()),
-            nbits=int(float(self.dsp_nbits_edit.text())),
-            
+            nbits=int(float(self.dsp_nbits_edit.text())),   
         )
 
         sh = [float(edit.text()) for edit in self.sh_edits]
@@ -267,7 +265,7 @@ class DeploymentInfoDialog(QDialog):
         savemat(
             path,
             {
-                "dsp": {"scale_factor": dsp.scale_factor,"gain": dsp.gain, "nbits": dsp.nbits},
+                "dsp": {"gain": dsp.gain, "nbits": dsp.nbits},
                 "bands": {"sh": np.array(bands.sh), "number": np.array(bands.number), "label": np.array(bands.label, dtype=object)},
                 # Stored as an ISO string for robust Python/MATLAB interchange.
                 # MATLAB can parse this with datetime(ddate, 'InputFormat', 'yyyy-MM-dd HH:mm:ss').
