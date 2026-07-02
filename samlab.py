@@ -411,7 +411,7 @@ class MainWindow(QMainWindow):
         self.double_slider.rangeChanged.connect(self.update_deployment_nav_image)
         
         # Connect click event
-        self.figDeployInspect.canvas.mpl_connect("button_press_event", self.deployisnpecOnClick)
+        self.figDeployInspect.canvas.mpl_connect("button_press_event", self.deployinspecOnClick)
 
         image_nav_layout = QHBoxLayout()
         # Add the canvas and dual slider to the Qt layout
@@ -692,7 +692,7 @@ class MainWindow(QMainWindow):
         #                     "\n\n",
         #                     "Author:\n",
         #                     "Ramon Miralles (UPV-iTEAM)","\n\n",
-        #                     "Licensed under the GNU General Public License v3.0 (GPLv3)\n\n",
+        #                     "Licensed under the GNU Affero General Public License v3.0 (AGPLv3+)\n\n",
         #                     "Alternative commercial licensing is available"])
         aboutString = """
 
@@ -701,7 +701,7 @@ class MainWindow(QMainWindow):
                     <b>Author:</b><br>
                     Ramon Miralles (UPV-iTEAM)<br><br>
 
-                    Licensed under the GNU General Public License v3.0 (GPLv3)<br><br>
+                    Licensed under the GNU Affero General Public License v3.0 or later (AGPLv3+)<br><br>
 
                     <i>Alternative commercial licensing is available</i>
                     """
@@ -1286,7 +1286,25 @@ class MainWindow(QMainWindow):
                 filename=dlg.selected_file()
                 self.workdir=os_path_split(filename) # Spearate and keep workdir of the Deployemnt.
                 B = pd.read_csv(filename, delimiter=";", dtype=str)
-                numberofcolumns=len(B.columns)  # Get the number of columns
+                numberofcolumns=B.shape[1]  # Get the number of columns
+                # Check if the deployment has at least two files to analyze (rows), otherwise it is not a valid deployment analysis
+                if B.shape[0] < 2:
+                    QMessageBox.warning(
+                        self,
+                        "Invalid deployment analysis",
+                        "The deployment analysis contains fewer than two files.\n\n"
+                        "The analysis appears to be incomplete or corrupted."
+                    )
+                    return
+                # Check if the deployment analysis has at least three columns (filename, date, and at least one parameter), otherwise it is not a valid deployment analysis
+                if numberofcolumns < 3:
+                    QMessageBox.warning(
+                        self,
+                        "Invalid deployment analysis",
+                        "The deployment analysis file has no Indicators."
+                    )
+                    return
+
                 aux_cell=B.columns.values[2:]  # Get the field names (omiting 1st two filename, date)
                 field_cell=[i.split('[', 1)[0] for i in aux_cell]
                 unit_cell=[i.split('[', 1)[-1].split(']')[0] for i in aux_cell]
@@ -1298,14 +1316,13 @@ class MainWindow(QMainWindow):
                 # self.fieldselect.setCurrentIndex(0)
         
                 B=B.replace(',', '.',regex=True)
-                self.A=B.iloc[:,2:].to_numpy()  # Remove name and date column
+                # Convert indicator columns to numeric values.
+                # Invalid / empty cells become NaN instead of crashing later.
+                self.A = (B.iloc[:, 2:].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float)) # Remove name and date column
 
-                self.parameterselected=self.A[:,0].astype(None)
-                self.FILENAME_TIME=B.iloc[:,0] #.as_matrix()
+                self.parameterselected = self.A[:, 0] 
 
-                #FILENAME_TIME = np.char.strip(B.iloc[:, 0].to_numpy())
-                # Convert the trimmed array to a matrix (2D numpy array)
-                Y = np.matrix(self.FILENAME_TIME)
+                self.FILENAME_TIME=B.iloc[:,0] # Keep the deployment file names in a variable to use it later in the program
 
                 deployment_date = datetime.strptime(B.iloc[0, 1].strip(), '%d-%b-%Y %H:%M:%S')
  
@@ -1315,11 +1332,26 @@ class MainWindow(QMainWindow):
                 self.graph_yticks = np.array(['dd-mmm-yyyy'] * self.A.shape[0])
                 self.FILENAME_REAL_TIME = np.array(['HH:MM:SS'] * self.A.shape[0])
 
-                for i in range(self.A.shape[0]):
-                    # Break filename (i.e. "BCA_P_1_20220526_135751.wav") into parts by "_" and "." characters
-                    fname_parts =re_split("[_.]",Y[0,i])
+                for i, fname in enumerate(self.FILENAME_TIME):
+                    
+                    if pd.isna(fname):
+                        print(f"Skipping row {i}: missing filename")
+                        continue
 
-                    real_date_at_i = pd.to_datetime(fname_parts[3] + fname_parts[4], format='%Y%m%d%H%M%S')  
+                    fname = str(fname).strip()
+                    # Break filename (i.e. "BCA_P_1_20220526_135751.wav") into parts by "_" and "." characters
+                    fname_parts = re_split(r"[_.]", fname)
+
+                    # Make sure we have a valid filename with enough parts to extract the timestamp
+                    if len(fname_parts) < 5:
+                        print(f"Skipping row {i}: malformed filename '{fname}'")
+                        continue
+                    
+                    try:
+                        real_date_at_i = pd.to_datetime(fname_parts[3] + fname_parts[4], format='%Y%m%d%H%M%S')
+                    except ValueError:
+                        print(f"Skipping row {i}: invalid timestamp in '{fname}'")
+                        continue
 
                     ho = real_date_at_i.hour
                     mn = real_date_at_i.minute
@@ -1408,7 +1440,7 @@ class MainWindow(QMainWindow):
 
     def fieldselect_Callback(self,event):
         valsel=self.fieldselect.currentIndex()
-        self.parameterselected=self.A[:,valsel].astype(None)
+        self.parameterselected=self.A[:,valsel]
         big_data_graph(self,self.parameterselected,self.graph_yticks,self.TIME_STAMP_day,self.TIME_STAMP_min)
         self.HC.set_label(self.parameter_units[valsel], size=10,rotation=90)
         vmin=np.nanmin(self.parameterselected);vmax=np.nanmax(self.parameterselected)
@@ -1429,7 +1461,7 @@ class MainWindow(QMainWindow):
 
         self.figDeployInspect.canvas.draw_idle()
 
-    def deployisnpecOnClick(self,event):
+    def deployinspecOnClick(self,event):
         
         graph_sep_line=2 # Graphic separation line
         pixx=int(self.TIME_STAMP_min[1]-self.TIME_STAMP_min[0])+2
