@@ -37,7 +37,7 @@ import time # To meassure time
 from math import floor
 # from threading import Timer # To execute code every x seconds
 from PIL import Image  # To read images (logos, etc)
-from scipy.io import wavfile
+from scipy.io import loadmat, wavfile
 from scipy import signal
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from textwrap import dedent #Unindent for multiline text
@@ -1088,8 +1088,10 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Could not open file:\n{e}")
             return
-          
-        # Remove the path and store only filename (with .wav)for later use in annotations
+        
+        # Keep full filename with path
+        self.current_file = filename
+        # Remove the path and store only filename (with .wav) for later use in annotations
         self.filename=os.path.basename(filename)
               
         # Load, if exist Manual Annotation file
@@ -1557,9 +1559,29 @@ class MainWindow(QMainWindow):
             # Disbale the filter by event menu until we have events to filter
             self.filter_automatic_det_action.setEnabled(False)
 
-            # Prepare dsp and hydrophone data that so far is not present.
+            # Load default dsp and bands callibration.
             dsp = default_dsp()
             bands = default_bands()
+
+            # Replece them if present with the dsp and bands in the deployment_info.mat file
+            try:
+                deployment_info = Path(self.current_file).parent / "deployment_info.mat"
+
+                if deployment_info.is_file():
+                    mat = loadmat(deployment_info, squeeze_me=True)
+
+                    if "dsp" in mat:
+                        dsp.gain = float(mat["dsp"]["gain"])
+                        dsp.nbits = int(mat["dsp"]["nbits"])
+
+                    if "bands" in mat:
+                        bands.number = mat["bands"]["number"].item().tolist()
+                        bands.sh = mat["bands"]["sh"].item().tolist()
+                        bands.label = mat["bands"]["label"].item().tolist()
+                        
+            # deployment_info.mat exists but is corrupt -> print a warning.
+            except Exception as e:
+                    print(f"Warning: Could not load deployment_info.mat: {e}")
 
             verbose=1
 
@@ -1724,7 +1746,7 @@ class MainWindow(QMainWindow):
             deployment_folder, restart_tasks =dlg_analyze_deployment_settings(self)
             if Path(deployment_folder, "deployment_info.mat").is_file():
                 print("Starting deployment analysis...")
-                analyze_samaruc_deployment(self,deployment_folder, restart_tasks, wposition=self.pos())
+                analyze_samaruc_deployment(self,deployment_folder, restart_tasks)
             else:
                 QMessageBox.warning(self,
                 "Invalid Deployment Folder",
