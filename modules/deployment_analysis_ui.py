@@ -252,7 +252,7 @@ def dlg_analyze_deployment_settings(self, parent=None):
 
     return result["folder"], result["restart"]
 
-def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition) -> None:
+def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
 #
 #
 # FUNTION    : analyze_SAMARUC_deployment
@@ -261,8 +261,8 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
 #
 #              PathName     : Directory of the deployment (must have a valid
 #                             "deployment_info.mat" file with all deployment data)
-#                             The function looks and analyze all the *.dat or
-#                             *.DAT files in the given PathName
+#                             The function looks and analyze all the *.wav or
+#                             *.WAV files in the given PathName
 #
 #              restart_tasks: Char with 'R' or 'C'.
 #                             'R' : Restart analysis of the whole
@@ -270,7 +270,6 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
 #                             'C' : Continue with the analysis where it was
 #                                   left with the possibility of adding
 #                                   detection tasks.
-#              wposition    : Window position of the calling function
 #
 #
 #---------------------------------------------------------------------
@@ -691,7 +690,8 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
             B = Bbackup
 
         plugins_to_run = []
-        file_indicators = []
+        #file_indicators = []
+        file_indicators = {}
 
         for cls in selected_plugins:
             plugin_state = selected_plugins_dict.get(cls, Qt.Checked)
@@ -700,8 +700,10 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
                 indtags = list(cls.outputs["indicators"].keys())
                 try:
                     row = B.loc[B.iloc[:, 0].astype(str).str.strip() == wavpath.name].iloc[0]
-                    values = [float(str(row[indtag]).replace(',', '.')) for indtag in indtags]  
-                    file_indicators.extend(values)
+                    #values = [float(str(row[indtag]).replace(',', '.')) for indtag in indtags]  
+                    #file_indicators.extend(values)
+                    for indtag in indtags:
+                        file_indicators[indtag] = float(str(row[indtag]).replace(',', '.'))
                 except Exception:
                     msg = ("ERROR: Backup CSV is inconsistent. Restart deployment analysis.")
                     with open(summary_log, 'a', encoding='utf-8') as fidlog:
@@ -763,13 +765,27 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
             if result["error"] is not None:
                 raise RuntimeError(result["error"])
 
+            # if result["events"] is not None and not result["events"].empty:
+            #     results_events = pd.concat(
+            #         [results_events, result["events"]],
+            #         ignore_index=True
+            #     )
+
             if result["events"] is not None and not result["events"].empty:
-                results_events = pd.concat(
+                if results_events.empty:
+                    results_events = result["events"].copy()
+                else:
+                    results_events = pd.concat(
                     [results_events, result["events"]],
                     ignore_index=True
                 )
 
-            file_indicators.extend(result["file_indicators"])
+            #file_indicators.extend(result["file_indicators"])
+            k = 0
+            for cls in plugins_to_run:
+                for indtag in cls.outputs["indicators"].keys():
+                    file_indicators[indtag] = result["file_indicators"][k]
+                    k += 1
 
 
         elapsed = time.time() - t0
@@ -787,34 +803,15 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
             real_date_at_i.strftime("%d-%b-%Y %H:%M:%S") if real_date_at_i else "",
         ]
 
-        row.extend(format_csv_value(v) for v in file_indicators)
+        #row.extend(format_csv_value(v) for v in file_indicators)
+        row.extend(
+            format_csv_value(file_indicators.get(indtag, np.nan))
+            for indtag in csvheader_current[2:]
+        )
 
         writer.writerow(row)
         fids.flush()
 
-        # row_fields = []
-        # row_fields.append(f"{wavpath.name} ;")
-        # row_fields.append(f"{real_date_at_i.strftime('%d-%b-%Y %H:%M:%S') if real_date_at_i else ''} ;")
-        # # For the rest of columns, MATLAB built using file_indicators list mapping to csvheader entries from index 3 onward
-        # for val in file_indicators[:-1]:
-        #     try:
-        #         s = f"{float(val):f} ;"
-        #     except Exception:
-        #         s = " ;"
-        #     s = s.replace('.', ',')
-        #     row_fields.append(s)
-        # # last one without trailing ; but replacing decimal separator
-        # if file_indicators:
-        #     try:
-        #         last = f"{float(file_indicators[-1]):f}"
-        #     except Exception:
-        #         last = ""
-        #     last = last.replace('.', ',')
-        #     row_fields.append(last)
-        # row_fields.append("\n")
-        # # write to file
-        # fids.write(''.join(row_fields))
-        # fids.flush()
 
         # Save detected events to HDF5 (here simple strategy: save CSV serialization of results_events)
         with h5py.File(detected_events_filename, 'w') as hf:
@@ -856,7 +853,14 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str, wposition
             if types_to_replace and "type" in old_df.columns:
                 old_df = old_df[~old_df["type"].isin(types_to_replace)]
 
-            merged = pd.concat([old_df, results_events], ignore_index=True)
+            #merged = pd.concat([old_df, results_events], ignore_index=True)
+            # Check if either old_df or results_events is empty to avoid concatenation issues
+            if old_df.empty:
+                merged = results_events.copy()
+            elif results_events.empty:
+                merged = old_df.copy()
+            else:
+                merged = pd.concat([old_df, results_events], ignore_index=True)
         else:
             merged = results_events.copy()
         # save merged into detected_events_filename
