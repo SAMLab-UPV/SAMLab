@@ -8,7 +8,7 @@ Licensed under the GNU Affero General Public License v3.0 or later.
 See the LICENSE file for details.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 @dataclass
 class DSP:
