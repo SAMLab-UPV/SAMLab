@@ -480,7 +480,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(frame)
 
         # --- Matplotlib figure and canvas ---
-        self.figSpect = Figure(figsize=(9, 7), dpi=80) # Before it was 9,8
+        self.figSpect = Figure(figsize=(8, 7), dpi=80) # Before it was 9,8
         self.figSpect.patch.set_alpha(0.0)  # transparent for dark mode
 
         self.spect_canvas = FigureCanvas(self.figSpect)
@@ -492,14 +492,17 @@ class MainWindow(QMainWindow):
         self.ax0.clear()
         bitmap = (np.zeros((51, 3700))).astype(np.uint8)
         self.TFR_bitmap = self.ax0.imshow(bitmap, cmap='jet', aspect='auto', origin='lower', interpolation='none')
-        self.ax0.set_title('Spectrum Level [dB re count^2/Hz]')
-        self.ax0.set_ylabel('Frequency [Hz]')
+        self.ax0.set_title('Spectrum Level [dB re count^2/Hz]', fontsize=LABEL_FONT_SIZE)
+        self.ax0.set_ylabel('Frequency [Hz]',fontsize=LABEL_FONT_SIZE)
+        self.ax0.tick_params(axis='both', which='major', labelsize=LABEL_FONT_SIZE)
+
 
         # Divider axes for time view and colorbar
         divider = make_axes_locatable(self.ax0)
         self.ax2 = divider.append_axes("bottom", size="15%", pad=0.28)
         cax = divider.append_axes("right", size="5%", pad=0.08)
-        self.figSpect.colorbar(self.TFR_bitmap, ax=self.ax0, cax=cax)
+        cbar =self.figSpect.colorbar(self.TFR_bitmap, ax=self.ax0, cax=cax)
+        cbar.ax.tick_params(labelsize=LABEL_FONT_SIZE) # Adjust colorbar tick label size
 
         # Time view
         mpl.rcParams['path.simplify_threshold'] = 1.0
@@ -507,8 +510,9 @@ class MainWindow(QMainWindow):
         self.ax2.yaxis.tick_right()
         self.ax2.set_xlim(0, 10)
         self.ax2.set_ylim(-32768, 32767)
-        self.ax2.set_ylabel('Amplitude\n[counts]')
-        self.ax2.set_xlabel('Time (sec.)')
+        self.ax2.set_ylabel('Amplitude\n[counts]', fontsize=LABEL_FONT_SIZE)
+        self.ax2.set_xlabel('Time (sec.)', fontsize=LABEL_FONT_SIZE)
+        self.ax2.tick_params(axis='both', which='major', labelsize=LABEL_FONT_SIZE)
 
         self.figSpect.subplots_adjust(left=0.02, right=0.88, top=0.98, bottom=0.02)
         self.figSpect.tight_layout(pad=0.1)
@@ -617,8 +621,9 @@ class MainWindow(QMainWindow):
 
         # Clear previous plots
         self.ax3.clear()
-        self.ax3.set_xlabel('Time (sec.)')
-        self.ax3.set_ylabel('SPL (dB re 1 uPa)')
+        self.ax3.set_xlabel('Time (sec.)',fontsize=LABEL_FONT_SIZE)
+        self.ax3.set_ylabel('SPL (dB re 1 uPa)',fontsize=LABEL_FONT_SIZE)
+        self.ax3.tick_params(axis='both', which='major', labelsize=LABEL_FONT_SIZE)
 
         # Add padding to avoid ylabel out of the canvas
         #self.figMiniature.subplots_adjust(left=0.15, right=0.97, top=0.98, bottom=.02)
@@ -1464,6 +1469,10 @@ class MainWindow(QMainWindow):
         self.figDeployInspect.canvas.draw_idle()
 
     def deployinspecOnClick(self,event):
+        
+        # Safety check to avoid errors when clicking outside the axes area
+        if event.xdata is None or event.ydata is None:
+            return
         
         graph_sep_line=2 # Graphic separation line
         pixx=int(self.TIME_STAMP_min[1]-self.TIME_STAMP_min[0])+2
