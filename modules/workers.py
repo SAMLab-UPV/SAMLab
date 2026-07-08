@@ -72,7 +72,8 @@ class DeploymentFileWorker(QThread):
     def run(self):
         try:
             events = pd.DataFrame()
-            file_indicators = []
+            # file_indicators = []  # Changed to a dictionary to store indicators for each file
+            file_indicators = {}
 
             for cls in self.selected_plugins:
                 if self.isInterruptionRequested():
@@ -99,7 +100,8 @@ class DeploymentFileWorker(QThread):
                     events = pd.concat([events, E], ignore_index=True)
 
                 if I is not None:
-                    file_indicators.extend(I.values())
+                    #file_indicators.extend(I.values())
+                    file_indicators.update(I) # Changed to work with dictionary of indicators
 
             self.finished.emit(events, file_indicators)
 
