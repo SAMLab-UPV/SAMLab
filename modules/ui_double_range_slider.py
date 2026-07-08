@@ -1,4 +1,12 @@
-from tkinter import font
+"""
+SAMLab - Submarine Acoustic Monitoring Laboratory
+Copyright (C) 2026 Universitat Politècnica de València
+
+This file is part of SAMLab.
+
+Licensed under the GNU Affero General Public License v3.0 or later.
+See the LICENSE file for details.
+"""
 
 from PySide6.QtCore import Qt, QPointF, Signal
 from PySide6.QtGui import QPainter,QColor,QPen,QPainterPath
