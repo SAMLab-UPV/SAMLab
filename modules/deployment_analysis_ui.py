@@ -32,7 +32,7 @@ from modules.ui_helpers import StatusWindow, EmittingStream
 from modules.workers import DeploymentFileWorker
 
 # Import DSP and Bands classes for structured data handling
-from modules.models import DSP, Bands
+from modules.models import DSP, Bands, EVENT_FIELDS_TYPES
 
 
 
@@ -549,8 +549,7 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
                 #Bbackup = pd.read_csv(deployment_indicators_filename_backup, delimiter=';', header=None, dtype=str, skiprows=1)
                 Bbackup = pd.read_csv(deployment_indicators_filename_backup, delimiter=';', dtype=str)
             # Initialize an empty results_events table with expected columns
-            # columns translated from MATLAB variable_names_types
-            columns = ["filename","start","end","fmin","fmax","f0","BW","ICI","SPL","score","user","type","tag","Tdata","Fdata"]
+            columns = ["filename"] + [name for name, _ in EVENT_FIELDS_TYPES]
             results_events = pd.DataFrame(columns=columns)
 
             # log detector versions and decisions
@@ -606,7 +605,7 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
             f.write(';'.join(csvheader_current) + '\n')
 
         # initialize empty results_events table with expected columns
-        columns = ["filename","start","end","fmin","fmax","f0","BW","ICI","SPL","score","user","type","tag","Tdata","Fdata"]
+        columns = ["filename"] + [name for name, _ in EVENT_FIELDS_TYPES]
         results_events = pd.DataFrame(columns=columns)
 
         # --- ADD INFO IN THE LOG OF THE DETECTORS AND VERSION USED IN THE TASK ---
@@ -661,6 +660,9 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
     def request_deployment_abort():
         nonlocal deployment_analysis_aborted
         deployment_analysis_aborted = True
+
+    # Get the nomber of columns expected in the CSV (for validation)
+    expected_cols = len(csvheader_current)
 
     for filesidx in range(start_idx, total_files):
         wavpath = allfiles[filesidx]
@@ -780,12 +782,7 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
                     ignore_index=True
                 )
 
-            #file_indicators.extend(result["file_indicators"])
-            k = 0
-            for cls in plugins_to_run:
-                for indtag in cls.outputs["indicators"].keys():
-                    file_indicators[indtag] = result["file_indicators"][k]
-                    k += 1
+            file_indicators.update(result["file_indicators"])
 
 
         elapsed = time.time() - t0
@@ -809,8 +806,15 @@ def analyze_samaruc_deployment(self,PathName: str, restart_tasks: str) -> None:
             for indtag in csvheader_current[2:]
         )
 
+        # Validate internal CSV consistency.
+        assert len(row) == expected_cols, (
+            f"CSV row/header mismatch for {wavpath.name}: "
+            f"{len(row)} values vs {expected_cols} columns"
+        )
+
         writer.writerow(row)
         fids.flush()
+        os.fsync(fids.fileno())
 
 
         # Save detected events to HDF5 (here simple strategy: save CSV serialization of results_events)
