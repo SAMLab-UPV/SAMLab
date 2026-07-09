@@ -63,7 +63,7 @@ from modules.annotation_ui import dlg_input_ma, ginput_rectangle, ginput_point
 # Imports for running detectors, redirect the progress and move the heavy load outside the main GUI to avoid freezing the app.
 from modules.workers import PluginWorker
 # Import the dialog to create/edit deployment_info file.
-from modules.deployment_creator_dialog import DeploymentInfoDialog
+from modules.deployment_creator_dialog import DeploymentInfoDialog, _mat_struct_to_dict, _scalar, _float_list
 from modules.ui_constants import LABEL_FONT_SIZE
 
 # Imports to handle analysis plugins
@@ -1581,16 +1581,23 @@ class MainWindow(QMainWindow):
                 deployment_info = Path(self.current_file).parent / "deployment_info.mat"
 
                 if deployment_info.is_file():
-                    mat = loadmat(deployment_info, squeeze_me=True)
+                    mat = loadmat(deployment_info, squeeze_me=True, struct_as_record=False)
 
-                    if "dsp" in mat:
-                        dsp.gain = float(mat["dsp"]["gain"])
-                        dsp.nbits = int(mat["dsp"]["nbits"])
+                    dsp_dict = _mat_struct_to_dict(mat.get("dsp", {}))
+                    bands_dict = _mat_struct_to_dict(mat.get("bands", {}))
 
-                    if "bands" in mat:
-                        bands.number = mat["bands"]["number"].item().tolist()
-                        bands.sh = mat["bands"]["sh"].item().tolist()
-                        bands.label = mat["bands"]["label"].item().tolist()
+                    dsp.gain = float(_scalar(dsp_dict.get("gain"), dsp.gain))
+                    dsp.nbits = int(float(_scalar(dsp_dict.get("nbits"), dsp.nbits)))
+
+                    if "number" in bands_dict:
+                        bands.number = [int(x) for x in _float_list(bands_dict["number"])]
+
+                    if "sh" in bands_dict:
+                        bands.sh = _float_list(bands_dict["sh"])
+
+                    if "label" in bands_dict:
+                        labels = np.asarray(bands_dict["label"]).ravel().tolist()
+                        bands.label = [str(x) for x in labels]
                         
             # deployment_info.mat exists but is corrupt -> print a warning.
             except Exception as e:
