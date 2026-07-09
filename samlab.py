@@ -1184,10 +1184,14 @@ class MainWindow(QMainWindow):
         Ndiv = max(1, len(self.x) // NPminiature) # // = Floor
         
         # To fix some distortions when creating the miniature representation if mean(x)<>0
-        xtemp=np.array(self.x)
+        xtemp=self.x
         xnm=xtemp-np.mean(xtemp)
         self.mini_x = np.max(np.reshape(xnm[:(len(xnm) // Ndiv) * Ndiv], (len(xnm) // Ndiv, Ndiv)),axis=1)
-        self.mini_x = self.mini_x * 0.8 / np.max(self.mini_x)
+        peak = np.max(np.abs(self.mini_x))
+        if peak > 0:
+            self.mini_x *= 0.8 / peak
+        else:
+            self.mini_x.fill(0.0)
         
         draw_auxiliary_nav_graph(self)
         
