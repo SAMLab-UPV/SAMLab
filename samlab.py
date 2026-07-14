@@ -238,11 +238,11 @@ class MainWindow(QMainWindow):
 
         open_action = QAction("Open File...", self)
         open_action.setShortcut("Ctrl+O")
-        self.open_previous_action_menu = QAction("Open Previous in chronological order", self)
-        self.open_previous_action_menu.setEnabled(False)  # disable initially
-        self.open_next_action_menu = QAction("Open Next in chronological order", self)
-        self.open_next_action_menu.setEnabled(False)  # disable initially
         open_DeploymentAnalysisFile_action = QAction("Open Deployment Analysis File...", self)
+        self.open_previous_action_menu = QAction("Open Previous File in Deployment Analysis", self)
+        self.open_previous_action_menu.setEnabled(False)  # disable initially
+        self.open_next_action_menu = QAction("Open Next File in Deployment Analysis", self)
+        self.open_next_action_menu.setEnabled(False)  # disable initially
         save_file_as_action=QAction("Save File as...", self)
         save_fragment_action=QAction("Select Fragment and Save...", self)
         save_file_as_action.setEnabled(False)  # disable initially
@@ -254,11 +254,11 @@ class MainWindow(QMainWindow):
         open_DeploymentAnalysisFile_action.triggered.connect(self.openDeploymentAnalysisFile)
 
         file_menu.addAction(open_action)
-        file_menu.addAction(self.open_previous_action_menu)
-        file_menu.addAction(self.open_next_action_menu)
         self.recent_menu = file_menu.addMenu("Recent Files") # Submenu for recent files, will be populated dynamically
         file_menu.addSeparator()
         file_menu.addAction(open_DeploymentAnalysisFile_action)
+        file_menu.addAction(self.open_next_action_menu)
+        file_menu.addAction(self.open_previous_action_menu)
         file_menu.addSeparator()
         file_menu.addAction(save_file_as_action)
         file_menu.addAction(save_fragment_action)
@@ -547,11 +547,11 @@ class MainWindow(QMainWindow):
         nav_layout.addWidget(self.gotoTimeLabel, 1, 4)
 
 
-        self.previousBut = QPushButton("Previous")
+        self.previousBut = QPushButton("Previous Time Frame")
         self.previousBut.setEnabled(False)
-        self.advanceBut = QPushButton("Advance automatically")
+        self.advanceBut = QPushButton("Auto Advance")
         self.advanceBut.setEnabled(False)
-        self.nextBut = QPushButton("Next")
+        self.nextBut = QPushButton("Next Time Frame")
         self.nextBut.setEnabled(False)
 
         self.previousBut.clicked.connect(self.previousTimeFrame)
@@ -780,7 +780,7 @@ class MainWindow(QMainWindow):
         if clamped_posx == self.posx:
             self.advance_timer.stop()
             self.is_running = False
-            self.advanceBut.setText("Advance Spectrogram Automatically")
+            self.advanceBut.setText("Auto Advance")
             return
         
         self.posx = clamped_posx
@@ -888,7 +888,7 @@ class MainWindow(QMainWindow):
             #self.timer_spect_advance = RepeatedTimer(.5,self.spect_advance_function, "World")
         else:
             self.is_running=False
-            self.advanceBut.setText("Advance Spectrogram Automatically")
+            self.advanceBut.setText("Auto Advance")
             self.advance_timer.stop()
 
     def edit_freqzoomdown_Callback(self):
@@ -1217,9 +1217,7 @@ class MainWindow(QMainWindow):
         self.nextBut.setEnabled(True)
         self.is_running = False
 
-        # --- Enable MENU ITEMS from MENUBAR -------
-        self.open_previous_action_menu.setEnabled(True)
-        self.open_next_action_menu.setEnabled(True) 
+        # --- Enable MENU ITEMS from MENUBAR ------- 
         self.save_file_as_action.setEnabled(True)  
         self.save_fragment_action.setEnabled(True)
         self.play_menu.setEnabled(True)
@@ -1275,13 +1273,53 @@ class MainWindow(QMainWindow):
 
     def openPreviousFile(self):
 
-        filename=self.windowTitle()
-        print(filename)
+        if not hasattr(self, "current_file"):
+            QMessageBox.information(
+                self,
+                "No WAV file opened",
+                "Open a WAV file from the deployment first."
+            )
+            return
+
+        current_filename = Path(self.current_file).name
+
+        actual_file_number = self.FILENAME_TIME[self.FILENAME_TIME == current_filename].index[0]
+
+        if actual_file_number > 0:
+            filename_to_open = self.FILENAME_TIME.iloc[actual_file_number - 1]
+            self.open_file(os_path_join(self.workdir[0], filename_to_open))
+            self.updateDeploymentFileMarker(actual_file_number - 1, self.pixx, self.pixy)
+        else:
+            QMessageBox.information(
+                self,
+                "Beginning of deployment",
+                "Already the first file in the deployment."
+            )
 
     def openNextFile(self):
 
-        filename=self.windowTitle()
-        print(filename)
+        if not hasattr(self, "current_file"):
+            QMessageBox.information(
+                self,
+                "No WAV file opened",
+                "Open a WAV file from the deployment first."
+            )
+            return
+
+        current_filename = Path(self.current_file).name
+
+        actual_file_number = self.FILENAME_TIME[self.FILENAME_TIME == current_filename].index[0]
+
+        if actual_file_number < len(self.FILENAME_TIME) - 1:
+            filename_to_open = self.FILENAME_TIME.iloc[actual_file_number + 1]
+            self.open_file(os_path_join(self.workdir[0], filename_to_open))
+            self.updateDeploymentFileMarker(actual_file_number + 1, self.pixx, self.pixy)
+        else:
+            QMessageBox.information(
+                self,
+                "End of deployment",
+                "Already the last file in the deployment."
+            )
             
    
 
@@ -1403,6 +1441,10 @@ class MainWindow(QMainWindow):
                 # Update the title with the deployment file name
                 self.setWindowTitle(filename)
 
+                # Enable the "Open Previous" and "Open Next" menu items
+                self.open_previous_action_menu.setEnabled(True)
+                self.open_next_action_menu.setEnabled(True)
+
                 # Load if exist Manual Annotation File
                 parent_directory=os.path.basename(os.path.dirname(filename))
                 self.current_annotation_file = f"{parent_directory}_manual_annotated.csv"
@@ -1472,6 +1514,58 @@ class MainWindow(QMainWindow):
 
         self.figDeployInspect.canvas.draw_idle()
 
+    def updateDeploymentFileMarker(self, filenumber,pixx,pixy):
+        xs=self.TIME_STAMP_min[filenumber]
+        ys=self.TIME_STAMP_day[filenumber]*pixy
+        
+        output_txt = """\
+                    Date: {0}
+                    Time: {1}
+                    File: {2}
+                    File #: {3} Value:{4}\
+        """.format(self.graph_yticks[int(self.TIME_STAMP_day[filenumber])],self.FILENAME_REAL_TIME[filenumber],self.FILENAME_TIME[filenumber],filenumber,self.parameterselected[filenumber])
+
+        # Place a marker around the pixel clicked
+        self.ll.set_bounds(xs-1, ys, pixx, pixy-1)
+        # Set the text to be displayed so that I can get the extents
+        self.lt.set_text(dedent(output_txt))
+        # Make it visible to get right the extents
+        self.lt.set_visible(True)
+        self.lp.set_visible(True)
+        # Force a draw so renderer is accurate 
+        self.figDeployInspect.canvas.draw_idle()
+        renderer = self.figDeployInspect.canvas.get_renderer()
+        bb_disp = self.lt.get_window_extent(renderer=renderer)
+        # Convert bbox display -> data coordinates CORRECTLY This handles the display y-down vs data y-up conversion for you.
+        bb_data = self.figDeployInspect.axes[0].transData.inverted().transform_bbox(bb_disp)
+        Twidth=bb_data.width
+        Theight=bb_data.height # Theight is negative because the axis are inverted.
+
+        # To avoid patch & text outside the graph
+        # Top left corner is (0,0) and y grows downwards, so to avoid patch & text outside the graph:
+        if ys - Theight > self.TIME_STAMP_day[-1]*pixy:
+            yt = ys + Theight
+        else:
+            yt = ys + pixy
+                
+        if xs - Twidth < 0:
+            xl = xs+pixx
+        else:
+            xl = xs - Twidth
+
+        self.lp.set_bounds(xl, yt, Twidth, -Theight)
+        self.lt.set_position((xl, yt))
+        self.lp.set_visible(True)
+        self.lt.set_visible(True)   
+
+        # Put rectangle below text visually
+        self.ll.set_zorder(1)   # rectangle at the back
+        self.lp.set_zorder(2)   # Patch in the middle
+        self.lt.set_zorder(3)   # text on top
+        #self.lp.set_zorder(self.lt.get_zorder() - 1)
+        self.ll.set_visible(True)
+        self.lp.set_visible(True)
+
     def deployinspecOnClick(self,event):
         
         # Safety check to avoid errors when clicking outside the axes area
@@ -1479,11 +1573,11 @@ class MainWindow(QMainWindow):
             return
         
         graph_sep_line=2 # Graphic separation line
-        pixx=int(self.TIME_STAMP_min[1]-self.TIME_STAMP_min[0])+2
-        pixy=15+graph_sep_line # Pixel size y (one file)
+        self.pixx=int(self.TIME_STAMP_min[1]-self.TIME_STAMP_min[0])+2
+        self.pixy=15+graph_sep_line # Pixel size y (one file)
 
         # Obtain the filenumeber in the position where the user "clicks"
-        day=floor(event.ydata/pixy)
+        day=floor(event.ydata/self.pixy)
         idx_min=np.argwhere(self.TIME_STAMP_day==day)  # Reduce the list to the selected day.
         file=np.argwhere(event.xdata>self.TIME_STAMP_min[idx_min[:,0]])
         
@@ -1502,58 +1596,7 @@ class MainWindow(QMainWindow):
                     lines = ["Sorry. Can't find the file "+self.FILENAME_TIME[filenumber[0]]+" in the directory", "Place the *.CSV and *.WAV files in the same directory."]
                     result =  QMessageBox.warning(self,"Ooops","\n".join(lines))
             else: # Normal click
-                
-                xs=self.TIME_STAMP_min[filenumber[0]]
-                ys=self.TIME_STAMP_day[filenumber[0]]*pixy
-        
-                output_txt = """\
-                            Date: {0}
-                            Time: {1}
-                            File: {2}
-                            File #: {3} Value:{4}\
-                """.format(self.graph_yticks[int(self.TIME_STAMP_day[filenumber[0]])],self.FILENAME_REAL_TIME[filenumber[0]],self.FILENAME_TIME[filenumber[0]],filenumber[0],self.parameterselected[filenumber[0]])
-
-                # Place a marker around the pixel clicked
-                self.ll.set_bounds(xs-1, ys, pixx, pixy-1)
-                # Set the text to be displayed so that I can get the extents
-                self.lt.set_text(dedent(output_txt))
-                # Make it visible to get right the extents
-                self.lt.set_visible(True)
-                self.lp.set_visible(True)
-                # Force a draw so renderer is accurate 
-                self.figDeployInspect.canvas.draw_idle()
-                renderer = self.figDeployInspect.canvas.get_renderer()
-                bb_disp = self.lt.get_window_extent(renderer=renderer)
-                # Convert bbox display -> data coordinates CORRECTLY This handles the display y-down vs data y-up conversion for you.
-                bb_data = self.figDeployInspect.axes[0].transData.inverted().transform_bbox(bb_disp)
-                Twidth=bb_data.width
-                Theight=bb_data.height # Theight is negative because the axis are inverted.
-
-                # To avoid patch & text outside the graph
-                # Top left corner is (0,0) and y grows downwards, so to avoid patch & text outside the graph:
-                if ys - Theight > self.TIME_STAMP_day[-1]*pixy:
-                    yt = ys + Theight
-                else:
-                    yt = ys + pixy
-                
-                if xs - Twidth < 0:
-                    xl = xs+pixx
-                else:
-                    xl = xs - Twidth
-
-                self.lp.set_bounds(xl, yt, Twidth, -Theight)
-                self.lt.set_position((xl, yt))
-                self.lp.set_visible(True)
-                self.lt.set_visible(True)   
-
-                # Put rectangle below text visually
-                self.ll.set_zorder(1)   # rectangle at the back
-                self.lp.set_zorder(2)   # Patch in the middle
-                self.lt.set_zorder(3)   # text on top
-                #self.lp.set_zorder(self.lt.get_zorder() - 1)
-                self.ll.set_visible(True)
-                self.lp.set_visible(True)
-
+                self.updateDeploymentFileMarker(filenumber[0],self.pixx,self.pixy)
                 self.figDeployInspect.canvas.draw_idle()
 
     def lookforevents_Callback(self):           
@@ -1799,7 +1842,8 @@ class MainWindow(QMainWindow):
             mbox = QMessageBox(self)
             mbox.setWindowTitle("Measure...")
             mbox.setText(msg)
-            mbox.setIcon(QMessageBox.Icon.Information)
+            #mbox.setIcon(QMessageBox.Icon.Information)
+            mbox.setIconPixmap(QPixmap("SAMLab_program_icon.png"))
             mbox.setStandardButtons(QMessageBox.StandardButton.Ok)
             mbox.exec()
 
