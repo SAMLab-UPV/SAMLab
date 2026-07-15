@@ -9,6 +9,7 @@ See the LICENSE file for details.
 """
 
 import os
+from shutil import copy2
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QLineEdit, QScrollBar, QComboBox, QPushButton, QGroupBox, QRadioButton,
@@ -54,6 +55,7 @@ import sounddevice as sd # To play audio files (better than pyaudio and supports
 
 # Local models
 from modules.models import DSP, Bands, EVENT_FIELDS_TYPES, default_dsp, default_bands
+from modules.select_and_save_dialog import SelectFragmentAndSaveDialog, ginput_point
 from modules.ui_helpers import  ask_open_file, is_number, clamp_posx, StatusWindow, EmittingStream, ReliableCsvDialog
 from modules.ui_double_range_slider import DoubleVerticalRangeSlider
 from modules.plugin_selector_dialog import  PluginSelector
@@ -243,15 +245,17 @@ class MainWindow(QMainWindow):
         self.open_previous_action_menu.setEnabled(False)  # disable initially
         self.open_next_action_menu = QAction("Open Next File in Deployment Analysis", self)
         self.open_next_action_menu.setEnabled(False)  # disable initially
-        save_file_as_action=QAction("Save File as...", self)
+        save_wav_copy_action=QAction("Save WAV Copy...", self)
         save_fragment_action=QAction("Select Fragment and Save...", self)
-        save_file_as_action.setEnabled(False)  # disable initially
+        save_wav_copy_action.setEnabled(False)  # disable initially
         save_fragment_action.setEnabled(False)  # disable initially
 
         open_action.triggered.connect(self.open_file)
         self.open_previous_action_menu.triggered.connect(self.openPreviousFile)
         self.open_next_action_menu.triggered.connect(self.openNextFile)
         open_DeploymentAnalysisFile_action.triggered.connect(self.openDeploymentAnalysisFile)
+        save_wav_copy_action.triggered.connect(self.save_wav_copy_Callback)
+        save_fragment_action.triggered.connect(self.select_and_save_fragment_Callback)
 
         file_menu.addAction(open_action)
         self.recent_menu = file_menu.addMenu("Recent Files") # Submenu for recent files, will be populated dynamically
@@ -260,10 +264,10 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.open_next_action_menu)
         file_menu.addAction(self.open_previous_action_menu)
         file_menu.addSeparator()
-        file_menu.addAction(save_file_as_action)
+        file_menu.addAction(save_wav_copy_action)
         file_menu.addAction(save_fragment_action)
 
-        self.save_file_as_action=save_file_as_action
+        self.save_wav_copy_action=save_wav_copy_action
         self.save_fragment_action=save_fragment_action
 
         # ---------------- Play Menu ----------------
@@ -1218,7 +1222,7 @@ class MainWindow(QMainWindow):
         self.is_running = False
 
         # --- Enable MENU ITEMS from MENUBAR ------- 
-        self.save_file_as_action.setEnabled(True)  
+        self.save_wav_copy_action.setEnabled(True)  
         self.save_fragment_action.setEnabled(True)
         self.play_menu.setEnabled(True)
         self.analyze_action.setEnabled(True)
@@ -1476,6 +1480,102 @@ class MainWindow(QMainWindow):
                 self.fieldselect.clear() # delete all items of the Field select combo box
                 self.fieldselect.addItems(field_cell)
                 self.fieldselect.setCurrentIndex(0)
+
+    def save_wav_copy_Callback(self):
+
+        source_file = Path(self.current_file)
+
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save WAV Copy As",
+            str(source_file.name),
+            "WAV Files (*.wav)"
+        )
+
+        if not filename:
+            return
+
+        try:
+            copy2(source_file, filename)
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Save Error",
+                f"Could not copy WAV file:\n\n{e}"
+            )
+            return
+
+        QMessageBox.information(
+            self,
+            "WAV Copy Saved",
+            f"Saved:\n{filename}"
+        )
+    
+    def select_and_save_fragment_Callback(self):
+        result = SelectFragmentAndSaveDialog.getSelection(self)
+
+        if result is None:
+            return
+
+        mode = result[0]
+
+        if mode == SelectFragmentAndSaveDialog.START_END:
+            fs = self.fs
+            msaveini = max(int(round(result[1] * fs)),0)
+            msavefin = min(int(round(result[2] * fs)),len(self.x))
+            temp_lines = []
+            
+        elif mode == SelectFragmentAndSaveDialog.CENTER_SAMPLES:
+
+            nsamples = result[1]
+            x0, _ = ginput_point(self)
+
+            h1 = self.ax0.axvline(x0)
+
+            h2 = self.ax0.axvline(
+                x0 - nsamples/(2*self.fs),
+                linestyle="--"
+            )
+
+            h3 = self.ax0.axvline(
+                x0 + nsamples/(2*self.fs),
+                linestyle="--"
+            )
+
+            msaveini = round(x0*self.fs - nsamples/2)
+            msavefin = round(x0*self.fs + nsamples/2)
+            temp_lines = [h1, h2, h3]
+
+        elif mode == SelectFragmentAndSaveDialog.CURRENT_SELECTION:
+            x1, _ = ginput_point(self)
+            h1 = self.ax0.axvline(x1, linestyle="--")
+
+            x2, _ = ginput_point(self)
+            h2 = self.ax0.axvline(x2, linestyle="--")
+
+            msaveini = round(min(x1, x2) * self.fs)
+            msavefin = round(max(x1, x2) * self.fs)
+            temp_lines = [h1, h2]
+
+        filename, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save Selected Fragment As",
+                "",
+                "WAV Files (*.wav)"
+            )
+        
+        if filename:
+            ys = self.x[msaveini:msavefin]
+            wavfile.write(filename,self.fs,ys)
+            for h in temp_lines:
+                try:
+                    h.remove()
+                except Exception:
+                    pass
+
+            self.figSpect.canvas.draw_idle()
+            return
 
     def update_deployment_nav_image(self, vmin, vmax):
         vmin = float(vmin)
@@ -2020,7 +2120,7 @@ class MainWindow(QMainWindow):
             quest_text = []
             for i in i_to_delete:
                 ev = self.m_annotated_events[i]
-                text = (f"{ev['m_event_type']} at: "f"{ev['tini']:12.2f}-{ev['tfin']:12.2f} s, "f"({ev['user']} on date: {ev['date_time_annotation']})")
+                text = (f"Delete manual annotation {ev['m_event_type']} from: "f"{ev['tini']:12.2f} to {ev['tfin']:12.2f} s, done by "f"{ev['user']} on date: {ev['date_time_annotation']}?")
                 quest_text.append(text)
             message = "\n".join(quest_text)
             
