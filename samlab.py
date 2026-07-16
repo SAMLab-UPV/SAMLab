@@ -339,9 +339,8 @@ class MainWindow(QMainWindow):
         self.save_manual_annottation_action.setEnabled(False)
         manual_annottation_menu.addAction(self.save_manual_annottation_action)
         manual_annottation_menu.addSeparator()
-        change_user_action = QAction("Change User...", self)
-        change_user_action.setEnabled(False)
-        manual_annottation_menu.addAction(change_user_action)
+        get_user_action = QAction("Get User annotation information...", self)
+        manual_annottation_menu.addAction(get_user_action)
         set_annotation_directory_action = QAction("Set Annotation Directory...", self)
         manual_annottation_menu.addAction(set_annotation_directory_action)
 
@@ -349,6 +348,7 @@ class MainWindow(QMainWindow):
         self.delete_manual_annottation_action.triggered.connect(self.delete_manual_annotation_Callback)
         self.edit_manual_annottation_action.triggered.connect(self.edit_manual_annotation_Callback)
         self.save_manual_annottation_action.triggered.connect(self.save_manual_annotations_Callback)
+        get_user_action.triggered.connect(self.get_user_Callback)
         set_annotation_directory_action.triggered.connect(self.set_annotation_directory_Callback)
 
         # ---------------- Experimental Menu ----------------
@@ -1993,20 +1993,20 @@ class MainWindow(QMainWindow):
         btn_change.clicked.connect(change_directory)
         dialog.exec()
     
-    # def set_annotation_directory_Callback(self):
-    #     folder = QFileDialog.getExistingDirectory(
-    #         self,
-    #         "Select Annotation Folder",
-    #         self.annotation_path or ""
-    #     )
+    def get_user_Callback(self):
 
-    #     if folder:
-    #         self.annotation_path = folder
+        username=getpass_getuser()
 
-    #         # ---- Save immediately ----
-    #         self.settings.setValue("annotation/path", folder)
-
-    #         #self.update_label()
+        msg=f"Current annotation user:\n\n{username}"
+        
+        mbox = QMessageBox(self)
+        mbox.setWindowTitle("SAMLab User")
+        mbox.setText(msg)
+        #mbox.setIcon(QMessageBox.Icon.Information)
+        mbox.setIconPixmap(QPixmap("SAMLab_program_icon.png"))
+        mbox.setStandardButtons(QMessageBox.StandardButton.Ok)
+        mbox.exec()
+        
 
     def add_manual_annotation_Callback(self):
         xpoint, ypoint, delta_t, delta_f=ginput_rectangle(self)
