@@ -55,7 +55,7 @@ import sounddevice as sd # To play audio files (better than pyaudio and supports
 
 # Local models
 from modules.models import DSP, Bands, EVENT_FIELDS_TYPES, default_dsp, default_bands
-from modules.select_and_save_dialog import SelectFragmentAndSaveDialog, ginput_point
+from modules.select_and_save_dialog import SelectFragmentAndSaveDialog
 from modules.ui_helpers import  ask_open_file, is_number, clamp_posx, StatusWindow, EmittingStream, ReliableCsvDialog
 from modules.ui_double_range_slider import DoubleVerticalRangeSlider
 from modules.plugin_selector_dialog import  PluginSelector
@@ -67,6 +67,8 @@ from modules.workers import PluginWorker
 # Import the dialog to create/edit deployment_info file.
 from modules.deployment_creator_dialog import DeploymentInfoDialog, _mat_struct_to_dict, _scalar, _float_list
 from modules.ui_constants import LABEL_FONT_SIZE
+# Import resources to load program icons and images 
+from modules.resources import resource
 
 # Imports to handle analysis plugins
 import analysis_plugins
@@ -414,8 +416,8 @@ class MainWindow(QMainWindow):
         # Connect the rangeChanged signal of the double slider to the update_image method
         self.double_slider.rangeChanged.connect(self.update_deployment_nav_image)
         
-        # Connect click event
-        self.figDeployInspect.canvas.mpl_connect("button_press_event", self.deployinspecOnClick)
+        # Create a click ID to handle clicking in the deployment inspector and initialize to None until a deployment is loaded
+        self.deploy_click_cid = None
 
         image_nav_layout = QHBoxLayout()
         # Add the canvas and dual slider to the Qt layout
@@ -427,7 +429,7 @@ class MainWindow(QMainWindow):
         self.ax4 = self.figDeployInspect.add_subplot(111)
 
         # set the initial spectrogram image displayed
-        bitmap = Image.open("samaruclogo.png")
+        bitmap = Image.open(resource("samaruclogo.png"))
         self.deployment_nav_bitmap = self.ax4.imshow(bitmap,cmap='hot_r',aspect='auto',origin='lower',interpolation='none')
         self.ax4.yaxis.set_inverted(True)     # To reverse YDir
         self.ax4.set_xlabel('+h (CET)')
@@ -671,14 +673,14 @@ class MainWindow(QMainWindow):
         # Spacer and logos
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         samLAB_label = QLabel()
-        SAMLab_icon=QPixmap("SAMLab_icon.png").scaled(203, 118)
+        SAMLab_icon=QPixmap(resource("SAMLab_icon.png")).scaled(203, 118)
         samLAB_label.setPixmap(SAMLab_icon)
         #samLAB_label.setScaledContents(True) 
         samLAB_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(samLAB_label)
         layout.addSpacing(40) # Add blank space
         UPVlogo_label = QLabel("")
-        pixmapUPVLogo=QPixmap("upv_logo.png")
+        pixmapUPVLogo=QPixmap(resource("upv_logo.png"))
         UPVlogo_label.setPixmap(pixmapUPVLogo)
         #UPVlogo_label.setScaledContents(True) 
         UPVlogo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -720,8 +722,8 @@ class MainWindow(QMainWindow):
         msg.setText("Submarine Acoustic Monitoring LABoratory (SAMLAB v{version})".format(version=VERSION))
         msg.setInformativeText(aboutString)
         msg.setIcon(QMessageBox.Icon.Information)  # note: enum moved under QMessageBox.Icon
-        msg.setWindowIcon(QIcon("SAMLab_icon.png"))  # changes window title icon
-        msg.setIconPixmap(QPixmap("SAMLab_program_icon.png").scaled(64, 64))  # custom message icon
+        msg.setWindowIcon(QIcon(resource("SAMLab_icon.png")))  # changes window title icon
+        msg.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")).scaled(64, 64))  # custom message icon
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg.exec()
 
@@ -1449,6 +1451,10 @@ class MainWindow(QMainWindow):
                 self.open_previous_action_menu.setEnabled(True)
                 self.open_next_action_menu.setEnabled(True)
 
+                # If not connected yet, connect click event to action
+                if self.deploy_click_cid is None:
+                    self.deploy_click_cid = self.figDeployInspect.canvas.mpl_connect("button_press_event",self.deployinspecOnClick)
+
                 # Load if exist Manual Annotation File
                 parent_directory=os.path.basename(os.path.dirname(filename))
                 self.current_annotation_file = f"{parent_directory}_manual_annotated.csv"
@@ -1670,6 +1676,10 @@ class MainWindow(QMainWindow):
         
         # Safety check to avoid errors when clicking outside the axes area
         if event.xdata is None or event.ydata is None:
+            return
+        
+        # Safety check to make sure there are at least two timestamps to work with
+        if len(self.TIME_STAMP_min) < 2:
             return
         
         graph_sep_line=2 # Graphic separation line
@@ -1943,7 +1953,7 @@ class MainWindow(QMainWindow):
             mbox.setWindowTitle("Measure...")
             mbox.setText(msg)
             #mbox.setIcon(QMessageBox.Icon.Information)
-            mbox.setIconPixmap(QPixmap("SAMLab_program_icon.png"))
+            mbox.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")))
             mbox.setStandardButtons(QMessageBox.StandardButton.Ok)
             mbox.exec()
 
@@ -2003,7 +2013,7 @@ class MainWindow(QMainWindow):
         mbox.setWindowTitle("SAMLab User")
         mbox.setText(msg)
         #mbox.setIcon(QMessageBox.Icon.Information)
-        mbox.setIconPixmap(QPixmap("SAMLab_program_icon.png"))
+        mbox.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")))
         mbox.setStandardButtons(QMessageBox.StandardButton.Ok)
         mbox.exec()
         
@@ -2303,7 +2313,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # Set the application-wide icon
-    app.setWindowIcon(QIcon("SAMLab_program_icon.png"))
+    app.setWindowIcon(QIcon(resource("SAMLab_program_icon.png")))
     
     # REQUIRED — defines where settings are stored
     app.setOrganizationName("UPV")
