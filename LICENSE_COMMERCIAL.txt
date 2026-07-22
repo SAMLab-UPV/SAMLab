@@ -1,20 +1,22 @@
 SAMLab Commercial Licensing
 
-SAMLab is available under the GNU Affero General Public License v3.0 (AGPLv3) for open-source use.
+SAMLab is available under the GNU General Public License v3.0 (GPLv3) for open-source use.
 
-Commercial licences are available for organisations wishing to use, modify, distribute, integrate, embed, or provide SAMLab as part of proprietary, OEM, SaaS, or other products without complying with the AGPLv3 requirements.
+Organizations or individuals wishing to use SAMLab under terms that are incompatible with the GPLv3 may obtain a separate commercial license.
+A commercial license may be appropriate if you wish to:
 
-Commercial licences may include:
+A commercial license may be appropriate if you wish to:
 
-* Permission to keep modifications proprietary.
-* Permission to distribute proprietary versions of SAMLab.
-* Permission to integrate SAMLab into commercial products and services.
-* OEM redistribution rights.
-* Additional support, maintenance, or consulting services where agreed.
+* Incorporate the software into proprietary or closed-source products.
+* Modify the software without releasing source code under the GPLv3.
+* Distribute proprietary versions of the software.
+* Embed or integrate the software into commercial applications, products, or services.
+* Obtain OEM or redistribution rights.
+* Receive commercial support, maintenance, consulting, or custom development services (where agreed).
 
-Commercial licence terms, pricing, and conditions are provided on a case-by-case basis.
+Commercial license terms, pricing, and conditions are negotiated on a case-by-case basis and are provided under a separate written agreement.
 
-For commercial licensing enquiries, please contact:
+For commercial licensing inquiries, please contact:
 
 samaruc.info@gmail.com
 

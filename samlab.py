@@ -4,7 +4,7 @@ Copyright (C) 2026 Universitat Politècnica de València
 
 This file is part of SAMLab.
 
-Licensed under the GNU Affero General Public License v3.0 or later.
+Licensed under the GNU General Public License v3.0 (GPLv3) or later.
 See the LICENSE file for details.
 """
 
@@ -703,7 +703,7 @@ class MainWindow(QMainWindow):
         #                     "\n\n",
         #                     "Author:\n",
         #                     "Ramon Miralles (UPV-iTEAM)","\n\n",
-        #                     "Licensed under the GNU Affero General Public License v3.0 (AGPLv3+)\n\n",
+        #                     "Licensed under the GNU General Public License v3.0 (GPLv3)\n\n",
         #                     "Alternative commercial licensing is available"])
         aboutString = """
 
@@ -712,7 +712,7 @@ class MainWindow(QMainWindow):
                     <b>Author:</b><br>
                     Ramon Miralles (UPV-iTEAM)<br><br>
 
-                    Licensed under the GNU Affero General Public License v3.0 or later (AGPLv3+)<br><br>
+                    Licensed under the GNU General Public License v3.0 (GPLv3)<br><br>
 
                     <i>Alternative commercial licensing is available</i>
                     """
