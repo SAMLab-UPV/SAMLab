@@ -207,6 +207,9 @@ class MainWindow(QMainWindow):
         # === Left Dockable Panel ===
         left_dock = QDockWidget("Deployment Navigation Graph", self)
         left_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        left_dock.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetMovable|
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable) # Allow floating around but prevent closing
         left_widget = self.create_left_panel()
         left_dock.setWidget(left_widget)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, left_dock)
