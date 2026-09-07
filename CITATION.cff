@@ -10,7 +10,7 @@ authors:
     affiliation: "Universitat Politècnica de València"
 
 version: v1.0.0
-date-released: "2026-07-09"
+date-released: "2026-09-07"
 
 license: GPLv3
 
@@ -18,12 +18,11 @@ repository-code: "https://github.com/SAMLab-UPV/SAMLab"
 url: "https://samaruc.webs.upv.es/index.php/samlab/"
 
 keywords:
-
-* passive acoustic monitoring
-* PAM
-* bioacoustics
-* underwater acoustics
-* marine mammals
-* acoustic monitoring
-* signal processing
-* biodiversity
+  - passive acoustic monitoring
+  - PAM
+  - bioacoustics
+  - underwater acoustics
+  - marine mammals
+  - acoustic monitoring
+  - signal processing
+  - biodiversity
