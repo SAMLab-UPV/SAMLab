@@ -15,7 +15,7 @@ date-released: "2026-07-09"
 
 license: GPLv3
 
-repository-code: "https://github.com/<your-user>/SAMLab"
+repository-code: "https://github.com/SAMLab-UPV/SAMLab"
 url: "https://samaruc.webs.upv.es/index.php/samlab/"
 
 keywords:
