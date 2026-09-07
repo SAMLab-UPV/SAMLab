@@ -5,10 +5,9 @@ abstract: "SAMLab is a cross-platform graphical software package for analysing, 
 type: software
 
 authors:
-
-* family-names: "Miralles"
-  given-names: "Ramon"
-  affiliation: "Universitat Politècnica de València"
+  - family-names: "Miralles"
+    given-names: "Ramon"
+    affiliation: "Universitat Politècnica de València"
 
 version: v1.0.0
 date-released: "2026-07-09"
