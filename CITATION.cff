@@ -10,10 +10,10 @@ authors:
   given-names: "Ramon"
   affiliation: "Universitat Politècnica de València"
 
-version: 0.9.4-beta
-date-released: "2026-06-05"
+version: v1.0.0
+date-released: "2026-07-09"
 
-license: AGPL-3.0-or-later
+license: GPLv3
 
 repository-code: "https://github.com/<your-user>/SAMLab"
 url: "https://samaruc.webs.upv.es/index.php/samlab/"

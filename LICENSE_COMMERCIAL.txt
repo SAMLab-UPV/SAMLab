@@ -3,7 +3,6 @@ SAMLab Commercial Licensing
 SAMLab is available under the GNU General Public License v3.0 (GPLv3) for open-source use.
 
 Organizations or individuals wishing to use SAMLab under terms that are incompatible with the GPLv3 may obtain a separate commercial license.
-A commercial license may be appropriate if you wish to:
 
 A commercial license may be appropriate if you wish to:
 

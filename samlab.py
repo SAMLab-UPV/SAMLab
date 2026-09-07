@@ -730,6 +730,32 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg.exec()
 
+    def closeEvent(self,event):
+        msg = QMessageBox()
+        msg.setWindowTitle("Exit SAMLab")
+        msg.setText("Are you sure you want to exit SAMLab?")
+        msg.setIcon(QMessageBox.Icon.Question)
+        msg.setWindowIcon(QIcon(resource("SAMLab_icon.png")))
+        msg.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")).scaled(64, 64))  # custom message icon
+
+        yes_button = msg.addButton(
+            "Yes",
+            QMessageBox.ButtonRole.YesRole
+        )
+        no_button = msg.addButton(
+            "No",
+            QMessageBox.ButtonRole.NoRole
+        )
+
+        msg.setDefaultButton(no_button)
+
+        msg.exec()
+
+        if msg.clickedButton() == yes_button:
+            event.accept()
+        else:
+            event.ignore()
+
     def previousTimeFrame(self,event):
         self.posx=np.max([0,self.posx-self.ventana])
         self.y=self.x[self.posx:self.posx+self.ventana]
