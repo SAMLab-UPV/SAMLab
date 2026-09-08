@@ -15,7 +15,7 @@ The software works well with Python 3.11.9.
 
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/rmiralle/SAMLab.git
+git clone https://github.com/SAMLab-UPV/SAMLab.git
 cd SAMLab
 pip install -r requirements.txt
 ```
