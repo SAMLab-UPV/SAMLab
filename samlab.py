@@ -725,7 +725,7 @@ class MainWindow(QMainWindow):
         msg.setText("Submarine Acoustic Monitoring LABoratory (SAMLAB v{version})".format(version=VERSION))
         msg.setInformativeText(aboutString)
         msg.setIcon(QMessageBox.Icon.Information)  # note: enum moved under QMessageBox.Icon
-        msg.setWindowIcon(QIcon(resource("SAMLab_icon.png")))  # changes window title icon
+        msg.setWindowIcon(QIcon(resource("SAMLab_logo.png")))  # changes window title icon
         msg.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")).scaled(64, 64))  # custom message icon
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg.exec()
@@ -735,7 +735,7 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle("Exit SAMLab")
         msg.setText("Are you sure you want to exit SAMLab?")
         msg.setIcon(QMessageBox.Icon.Question)
-        msg.setWindowIcon(QIcon(resource("SAMLab_icon.png")))
+        msg.setWindowIcon(QIcon(resource("SAMLab_logo.png")))
         msg.setIconPixmap(QPixmap(resource("SAMLab_program_icon.png")).scaled(64, 64))  # custom message icon
 
         yes_button = msg.addButton(
