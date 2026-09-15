@@ -432,7 +432,7 @@ class MainWindow(QMainWindow):
         self.ax4 = self.figDeployInspect.add_subplot(111)
 
         # set the initial spectrogram image displayed
-        bitmap = Image.open(resource("samaruclogo.png"))
+        bitmap = Image.open(resource("SAMLabDeployIns.png"))
         self.deployment_nav_bitmap = self.ax4.imshow(bitmap,cmap='hot_r',aspect='auto',origin='lower',interpolation='none')
         self.ax4.yaxis.set_inverted(True)     # To reverse YDir
         self.ax4.set_xlabel('+h (CET)')
@@ -676,7 +676,7 @@ class MainWindow(QMainWindow):
         # Spacer and logos
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         samLAB_label = QLabel()
-        SAMLab_icon=QPixmap(resource("SAMLab_icon.png")).scaled(203, 118)
+        SAMLab_icon=QPixmap(resource("SAMLab_logo.png")).scaled(203, 118)
         samLAB_label.setPixmap(SAMLab_icon)
         #samLAB_label.setScaledContents(True) 
         samLAB_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
