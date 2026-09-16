@@ -4,15 +4,18 @@ title: SAMLab - Submarine Acoustic Monitoring Laboratory
 abstract: "SAMLab is a cross-platform graphical software package for analysing, visualising, and reporting results from long-term Passive Acoustic Monitoring (PAM) campaigns. The software provides an extensible plugin framework for species-specific detectors and custom analysis workflows, enabling scalable processing and review of large acoustic datasets."
 type: software
 
+doi: "10.5281/zenodo.22791671"
+
 authors:
-  - family-names: "Miralles"
+  - family-names: "Miralles-Ricos"
     given-names: "Ramon"
+    orcid: "https://orcid.org/0000-0003-0039-2553"
     affiliation: "Universitat Politècnica de València"
 
 version: 1.0.0
 date-released: "2026-09-07"
 
-license: GPLv3
+license: LGPL-3.0-or-later
 
 repository-code: "https://github.com/SAMLab-UPV/SAMLab"
 url: "https://samaruc.webs.upv.es/index.php/samlab/"
