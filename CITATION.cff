@@ -4,9 +4,11 @@ title: SAMLab - Submarine Acoustic Monitoring Laboratory
 abstract: "SAMLab is a cross-platform graphical software package for analysing, visualising, and reporting results from long-term Passive Acoustic Monitoring (PAM) campaigns. The software provides an extensible plugin framework for species-specific detectors and custom analysis workflows, enabling scalable processing and review of large acoustic datasets."
 type: software
 
+doi: "10.5281/zenodo.22791671"
+
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.22791671
+    value: "10.5281/zenodo.22791671"
     description: "DOI de Zenodo para la versión 1.0.0"
 
 authors:
